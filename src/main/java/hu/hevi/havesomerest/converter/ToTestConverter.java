@@ -5,6 +5,7 @@ import hu.hevi.havesomerest.io.TestFile;
 import hu.hevi.havesomerest.test.Test;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
@@ -31,6 +32,9 @@ public class ToTestConverter {
     private static final String RESPONSE = "response";
     private static final String REQUEST = "request";
     private static final String JSON_SUFFIX = ".json";
+
+    @Autowired
+    private HeadersHelper headersHelper;
 
     public Map<Test, JSONObject> convert(Map<Path, Optional<TestDirectory>> filesByDirectory) {
 
@@ -163,7 +167,7 @@ public class ToTestConverter {
             JSONObject requestWrapper = (JSONObject) jsonObject.get(REQUEST);
             JSONObject body = (JSONObject) requestWrapper.get(BODY);
 
-            HttpHeaders httpHeaders = getHeaders(requestWrapper);
+            HttpHeaders httpHeaders = headersHelper.getHeaders(requestWrapper);
             testBuilder.requestHeaders(httpHeaders);
 
             Map<String, String> parameters = getParameters(requestWrapper);
@@ -176,7 +180,7 @@ public class ToTestConverter {
             JSONObject headers = (JSONObject) response.get(HEADERS);
             testBuilder.response((JSONObject) response.get(BODY));
 
-            HttpHeaders httpHeaders = getHeaders(response);
+            HttpHeaders httpHeaders = headersHelper.getHeaders(response);
             testBuilder.responseHeaders(httpHeaders);
         }
         if (jsonObject.has(DESCRIPTION)) {
@@ -184,19 +188,6 @@ public class ToTestConverter {
             testBuilder.description(((String) jsonObject.get(DESCRIPTION).toString())).build();
         }
         return testBuilder.pathVariablesByName(new HashMap<>()).build();
-    }
-
-    private HttpHeaders getHeaders(JSONObject requestWrapper) {
-        HttpHeaders httpHeaders = new HttpHeaders();
-        JSONObject rawHeaders = (JSONObject) requestWrapper.get(HEADERS);
-        try {
-            rawHeaders.keySet().forEach(key -> {
-                httpHeaders.add(key, (String) rawHeaders.get(key));
-            });
-        } catch (NullPointerException e) {
-            log.warn("Test file does not contain headers section");
-        }
-        return httpHeaders;
     }
 
     private Map<String, String> getParameters(JSONObject requestWrapper) {
