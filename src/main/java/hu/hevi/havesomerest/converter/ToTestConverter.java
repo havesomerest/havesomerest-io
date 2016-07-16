@@ -18,9 +18,6 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ToTestConverter {
 
-    private static final String RESPONSE = "response";
-    private static final String REQUEST = "request";
-    private static final String JSON_SUFFIX = ".json";
     public static final String HEADERS = "headers";
     public static final String BODY = "body";
     public static final String DESCRIPTION = "description";
@@ -31,6 +28,9 @@ public class ToTestConverter {
     public static final String PATCH = "patch";
     public static final String DELETE = "delete";
     public static final String JSON = "json";
+    private static final String RESPONSE = "response";
+    private static final String REQUEST = "request";
+    private static final String JSON_SUFFIX = ".json";
 
     public Map<Test, JSONObject> convert(Map<Path, Optional<TestDirectory>> filesByDirectory) {
 
@@ -91,27 +91,37 @@ public class ToTestConverter {
         testDirectories.stream()
                        .map(TestDirectory::getTestFiles)
                        .forEach(testCase -> {
-                           testCase.forEach(test -> {
+                           testCase.forEach(testFile -> {
                                try {
-                                   String fileContent = new String(Files.readAllBytes(test.getPath()));
-                                   if (isJson(test)) {
+                                   String fileContent = new String(Files.readAllBytes(testFile.getPath()));
+                                   if (isJson(testFile)) {
                                        JSONObject convertedObject = new JSONObject(fileContent);
 
-                                       if (isTestFile(test)) {
+                                       if (isTestFile(testFile)) {
                                            Test t = getTest(convertedObject);
-                                           String filename = test.getFileName();
+                                           String filename = testFile.getFileName();
                                            t.setName(filename);
 
-                                           String[] splittedPath = test.getPath().toString().split("/");
-                                           List<String> endpoint = getEndpoint(splittedPath);
-                                           t.setEndpointParts(endpoint);
+                                           String[] splittedPath = testFile.getPath().toString().split("/");
+                                           List<String> endpoints = getEndpoint(splittedPath);
+                                           t.setEndpointParts(endpoints);
 
+                                           List<String> pathVariablesInFileName = getPathVariablesFromFilename(testFile);
+                                           log.debug("pathVariables in filename: " + pathVariablesInFileName.toString());
 
-                                           String[] splittedByUnderscore = test.getFileName().split("_");
-                                           if (splittedByUnderscore.length > 2) {
-                                               t.getPathVariablesByName().put(endpoint.get(endpoint.size() - 1), splittedByUnderscore[1]);
+                                           if (pathVariablesInFileName.size() > 0) {
+                                               List<String> pathVariablesInEndpoint = endpoints.stream().filter(endpoint -> {
+                                                   return endpoint.startsWith("_") && endpoint.endsWith("_");
+                                               }).collect(Collectors.toList());
+
+                                               for (int i = 0; i < pathVariablesInFileName.size(); i++) {
+                                                   try {
+                                                       t.getPathVariablesByName().put(pathVariablesInEndpoint.get(i), pathVariablesInFileName.get(i));
+                                                   } catch (IndexOutOfBoundsException e) {
+                                                       log.warn("No Pathvariable in: " + t.toString());
+                                                   }
+                                               }
                                            }
-
 
                                            String statusCode = getStatusCodeFromFilename(filename);
                                            HttpMethod httpMethod = getMethodFromFilename(filename);
@@ -128,6 +138,23 @@ public class ToTestConverter {
                            });
                        });
         return testByFileContent;
+    }
+
+    private List<String> getPathVariablesFromFilename(TestFile testFile) {
+        String[] filenameSplittedByUnderscore = testFile.getFileName().split("_");
+        List<String> filenameSplittedList = new LinkedList<>();
+        if (filenameSplittedByUnderscore.length > 1) {
+            filenameSplittedList = new LinkedList<>(Arrays.asList(filenameSplittedByUnderscore));
+            if (hasAtLeastTwoElements(filenameSplittedList)) {
+                filenameSplittedList.remove(0);
+                filenameSplittedList.remove(filenameSplittedList.size() - 1);
+            }
+        }
+        return filenameSplittedList;
+    }
+
+    private boolean hasAtLeastTwoElements(List<String> filenameSplittedList) {
+        return filenameSplittedList.size() > 1;
     }
 
     private Test getTest(JSONObject jsonObject) {
