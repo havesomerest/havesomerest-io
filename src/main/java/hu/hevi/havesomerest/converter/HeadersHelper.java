@@ -1,15 +1,17 @@
 package hu.hevi.havesomerest.converter;
 
-import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 
 @Component
-@Slf4j
 public class HeadersHelper {
 
-    public static final String HEADERS = "headers";
+    private static final String HEADERS = "headers";
+
+    private Logger log = LoggerFactory.getLogger(HeadersHelper.class);
 
     public HttpHeaders getHeaders(JSONObject requestWrapper) {
         HttpHeaders httpHeaders = new HttpHeaders();
@@ -22,5 +24,9 @@ public class HeadersHelper {
             log.warn("Test file does not contain headers section");
         }
         return httpHeaders;
+    }
+
+    void setLog(Logger log) {
+        this.log = log;
     }
 }
