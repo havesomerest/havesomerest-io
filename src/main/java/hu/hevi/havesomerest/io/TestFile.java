@@ -1,12 +1,10 @@
 package hu.hevi.havesomerest.io;
 
-import hu.hevi.havesomerest.test.TestDBData;
-import hu.hevi.havesomerest.test.TestDBSchema;
-import lombok.Data;
+import lombok.Value;
 
 import java.nio.file.Path;
 
-@Data
+@Value
 public class TestFile {
 
     public static final int STATUS_CODE_LENGTH = 3;
@@ -15,8 +13,6 @@ public class TestFile {
     public static final int DELETE_LENGTH = 6;
 
     private final Path path;
-    private TestDBData dbData;
-    private TestDBSchema dBSchema;
 
     public String getFileName() {
         return path.getFileName().toString();
@@ -38,18 +34,6 @@ public class TestFile {
         return path.getFileName().toString().startsWith("delete");
     }
 
-    public void ifGet(WithoutParameter withoutParameter) {
-        if (isGet()) {
-            withoutParameter.run();
-        }
-    }
-
-    public void ifPost(WithoutParameter withoutParameter) {
-        if (isPost()) {
-            withoutParameter.run();
-        }
-    }
-
     public String getStatus() {
         String status = "";
         int offset = GET_OR_PUT_LENGTH;
@@ -61,16 +45,5 @@ public class TestFile {
 
         status = getFileName().substring(offset, offset + STATUS_CODE_LENGTH);
         return status;
-    }
-
-//    public boolean isStatus(HttpStatus status) {
-//        boolean isStatus = false;
-//        return false;
-//
-//    }
-
-    @FunctionalInterface
-    interface WithoutParameter {
-        void run();
     }
 }

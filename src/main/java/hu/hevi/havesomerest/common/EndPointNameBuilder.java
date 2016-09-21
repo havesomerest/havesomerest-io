@@ -9,11 +9,7 @@ public class EndPointNameBuilder {
     public String build(Test test) {
         String endPoint = "";
         for (String part : test.getEndpointParts()) {
-            if (part.startsWith("_") && part.endsWith("_")) {
-                endPoint = endPoint + "/" + test.getPathVariablesByName().get(part);
-            } else {
-                endPoint = endPoint + part;
-            }
+            endPoint = endPoint + "/" + part;
         }
         return endPoint;
     }

@@ -1,5 +1,6 @@
 package hu.hevi.havesomerest.io;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -10,12 +11,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+@Slf4j
 @Component
 public class StructureReader {
 
     public static final String TEST_DIR_PATH = "src/test/rest";
 
     public Map<Path, Optional<TestDirectory>> getStructure() throws IOException {
+        log.info("Looking for tests in: " + TEST_DIR_PATH + "\n");
+
         Path rootPath = Paths.get(TEST_DIR_PATH).toAbsolutePath();
 
         Map<Path, Optional<TestDirectory.TestDirectoryBuilder>> filesInDirectory = new HashMap<>();

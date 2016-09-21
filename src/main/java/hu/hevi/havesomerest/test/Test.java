@@ -24,4 +24,8 @@ public class Test {
     private JSONObject request;
     private JSONObject response;
     private HttpHeaders responseHeaders;
+
+    public boolean hasRequest() {
+        return request != null;
+    }
 }

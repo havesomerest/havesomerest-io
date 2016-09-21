@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.MessageFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -46,6 +47,8 @@ public class ToTestConverter {
         });
 
         Map<Test, JSONObject> testsByFileContent = getTests(testDirectories);
+
+        log.info(MessageFormat.format("{0} tests found...\n", testsByFileContent.keySet().size()));
 
         return testsByFileContent;
     }
@@ -165,7 +168,10 @@ public class ToTestConverter {
         Test.TestBuilder testBuilder = Test.builder();
         if (jsonObject.has(REQUEST)) {
             JSONObject requestWrapper = (JSONObject) jsonObject.get(REQUEST);
-            JSONObject body = (JSONObject) requestWrapper.get(BODY);
+            if (requestWrapper.has(BODY)) {
+                JSONObject body = (JSONObject) requestWrapper.get(BODY);
+                testBuilder.request(body);
+            }
 
             HttpHeaders httpHeaders = headersHelper.getHeaders(requestWrapper);
             testBuilder.requestHeaders(httpHeaders);
@@ -173,12 +179,13 @@ public class ToTestConverter {
             Map<String, String> parameters = getParameters(requestWrapper);
             testBuilder.requestParams(parameters);
 
-            testBuilder.request(body);
         }
         if (jsonObject.has(RESPONSE)) {
             JSONObject response = (JSONObject) jsonObject.get(RESPONSE);
             JSONObject headers = (JSONObject) response.get(HEADERS);
-            testBuilder.response((JSONObject) response.get(BODY));
+            if (response.has(BODY)) {
+                testBuilder.response((JSONObject) response.get(BODY));
+            }
 
             HttpHeaders httpHeaders = headersHelper.getHeaders(response);
             testBuilder.responseHeaders(httpHeaders);
