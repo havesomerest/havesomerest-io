@@ -7,10 +7,13 @@ import java.nio.file.Path;
 @Value
 public class TestFile {
 
-    public static final int STATUS_CODE_LENGTH = 3;
-    public static final int GET_OR_PUT_LENGTH = 3;
-    public static final int POST_LENGTH = 4;
-    public static final int DELETE_LENGTH = 6;
+    private static final int STATUS_CODE_LENGTH = 3;
+    private static final int GET_OR_PUT_LENGTH = 3;
+    private static final int POST_LENGTH = 4;
+    private static final int DELETE_LENGTH = 6;
+
+    private static final String JSON = "json";
+    private static final String JSON_SUFFIX = ".json";
 
     private final Path path;
 
@@ -45,5 +48,19 @@ public class TestFile {
 
         status = getFileName().substring(offset, offset + STATUS_CODE_LENGTH);
         return status;
+    }
+
+    public boolean isJson() {
+        return this.getFileName().endsWith(JSON_SUFFIX);
+    }
+
+    public boolean isTestFile() {
+        String fileName = this.getFileName();
+        String[] split = fileName.split("[.]");
+        boolean isTestFile = false;
+        if (split.length == 2 && JSON.equals(split[1])) {
+            isTestFile = true;
+        }
+        return isTestFile;
     }
 }
