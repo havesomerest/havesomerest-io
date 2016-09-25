@@ -1,7 +1,9 @@
 package hu.hevi.havesomerest.test;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.json.JSONObject;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -11,6 +13,8 @@ import java.util.Map;
 
 @Data
 @Builder(toBuilder = true)
+@NoArgsConstructor
+@AllArgsConstructor
 public class Test {
 
     private String name;
@@ -28,4 +32,11 @@ public class Test {
     public boolean hasRequest() {
         return request != null;
     }
+
+    public boolean hasResponse() {
+        return response != null;
+    }
+
+
+
 }

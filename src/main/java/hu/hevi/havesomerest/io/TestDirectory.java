@@ -13,6 +13,7 @@ import java.util.List;
 public class TestDirectory {
 
     private Path testFolder;
+
     @Singular
     private List<TestFile> testFiles = new ArrayList<>();
 

@@ -3,6 +3,10 @@ package hu.hevi.havesomerest.converter;
 import lombok.Value;
 import org.springframework.http.HttpMethod;
 
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+
 @Value
 public class Filename {
 
@@ -52,5 +56,22 @@ public class Filename {
             statusCode = name.substring(6, 9);
         }
         return statusCode;
+    }
+
+    public List<String> getPathVariables() {
+        String[] filenameSplittedByUnderscore = this.name.split("_");
+        List<String> filenameSplittedList = new LinkedList<>();
+        if (filenameSplittedByUnderscore.length > 1) {
+            filenameSplittedList = new LinkedList<>(Arrays.asList(filenameSplittedByUnderscore));
+            if (hasAtLeastTwoElements(filenameSplittedList)) {
+                filenameSplittedList.remove(0);
+                filenameSplittedList.remove(filenameSplittedList.size() - 1);
+            }
+        }
+        return filenameSplittedList;
+    }
+
+    private boolean hasAtLeastTwoElements(List<String> filenameSplittedList) {
+        return filenameSplittedList.size() > 1;
     }
 }

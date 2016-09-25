@@ -1,14 +1,15 @@
 package hu.hevi.havesomerest.common;
 
-import hu.hevi.havesomerest.test.Test;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 public class EndPointNameBuilder {
 
-    public String build(Test test) {
+    public String build(List<String> endpointParts) {
         String endPoint = "";
-        for (String part : test.getEndpointParts()) {
+        for (String part : endpointParts) {
             endPoint = endPoint + "/" + part;
         }
         return endPoint;

@@ -4,8 +4,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.http.HttpMethod;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotSame;
+import java.util.Arrays;
+import java.util.List;
+
+import static org.junit.Assert.*;
 
 public class FilenameTest {
 
@@ -41,7 +43,7 @@ public class FilenameTest {
         String actual = underTest.getName();
 
         // THEN
-        assertNotSame(expected, actual);
+        assertFalse(expected.equals(actual));
     }
 
     @Test
@@ -69,7 +71,7 @@ public class FilenameTest {
         HttpMethod actual = underTest.getMethod();
 
         // THEN
-        assertNotSame(expected, actual);
+        assertFalse(expected.equals(actual));
     }
 
     @Test
@@ -97,7 +99,7 @@ public class FilenameTest {
         HttpMethod actual = underTest.getMethod();
 
         // THEN
-        assertNotSame(expected, actual);
+        assertFalse(expected.equals(actual));
     }
 
     @Test
@@ -125,7 +127,7 @@ public class FilenameTest {
         HttpMethod actual = underTest.getMethod();
 
         // THEN
-        assertNotSame(expected, actual);
+        assertFalse(expected.equals(actual));
     }
 
     @Test
@@ -153,7 +155,7 @@ public class FilenameTest {
         HttpMethod actual = underTest.getMethod();
 
         // THEN
-        assertNotSame(expected, actual);
+        assertFalse(expected.equals(actual));
     }
 
     @Test
@@ -181,7 +183,7 @@ public class FilenameTest {
         HttpMethod actual = underTest.getMethod();
 
         // THEN
-        assertNotSame(expected, actual);
+        assertFalse(expected.equals(actual));
     }
 
     @Test
@@ -209,7 +211,7 @@ public class FilenameTest {
         String actual = underTest.getStatusCode();
 
         // THEN
-        assertNotSame(expected, actual);
+        assertFalse(expected.equals(actual));
     }
 
     @Test
@@ -237,7 +239,7 @@ public class FilenameTest {
         String actual = underTest.getStatusCode();
 
         // THEN
-        assertNotSame(expected, actual);
+        assertFalse(expected.equals(actual));
     }
 
     @Test
@@ -265,7 +267,7 @@ public class FilenameTest {
         String actual = underTest.getStatusCode();
 
         // THEN
-        assertNotSame(expected, actual);
+        assertFalse(expected.equals(actual));
     }
 
     @Test
@@ -293,7 +295,7 @@ public class FilenameTest {
         String actual = underTest.getStatusCode();
 
         // THEN
-        assertNotSame(expected, actual);
+        assertFalse(expected.equals(actual));
     }
 
     @Test
@@ -321,6 +323,62 @@ public class FilenameTest {
         String actual = underTest.getStatusCode();
 
         // THEN
-        assertNotSame(expected, actual);
+        assertFalse(expected.equals(actual));
+    }
+
+    @Test
+    public void testGetPathVariablesShouldEqual() throws Exception {
+        // GIVEN
+        List<String> expected = Arrays.asList("pathVar1", "pathVar2");
+
+        underTest = new Filename("get200_pathVar1_pathVar2_MyTest.json");
+
+        // WHEN
+        List<String> actual = underTest.getPathVariables();
+
+        // THEN
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testGetPathVariablesWhenLessIsPresentShouldNotEqual() throws Exception {
+        // GIVEN
+        List<String> expected = Arrays.asList("pathVar1", "pathVar2");
+
+        underTest = new Filename("get200_pathVar1MyTest.json");
+
+        // WHEN
+        List<String> actual = underTest.getPathVariables();
+
+        // THEN
+        assertFalse(expected.equals(actual));
+    }
+
+    @Test
+    public void testGetPathVariablesWhenMoreIsPresentShouldNotEqual() throws Exception {
+        // GIVEN
+        List<String> expected = Arrays.asList("pathVar1", "pathVar2");
+
+        underTest = new Filename("get200_pathVar1_pathVar2_pathVar3_MyTest.json");
+
+        // WHEN
+        List<String> actual = underTest.getPathVariables();
+
+        // THEN
+        assertFalse(expected.equals(actual));
+    }
+
+    @Test
+    public void testGetPathVariablesWhenTheyDifferentShouldNotEqual() throws Exception {
+        // GIVEN
+        List<String> expected = Arrays.asList("notThis1", "notThis2");
+
+        underTest = new Filename("get200_pathVar1_pathVar2_MyTest.json");
+
+        // WHEN
+        List<String> actual = underTest.getPathVariables();
+
+        // THEN
+        assertFalse(expected.equals(actual));
     }
 }

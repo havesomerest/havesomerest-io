@@ -1,5 +1,6 @@
 package hu.hevi.havesomerest.io;
 
+import hu.hevi.havesomerest.converter.Filename;
 import lombok.Value;
 
 import java.nio.file.Path;
@@ -17,8 +18,8 @@ public class TestFile {
 
     private final Path path;
 
-    public String getFileName() {
-        return path.getFileName().toString();
+    public Filename getFileName() {
+        return new Filename(path.getFileName().toString());
     }
 
     public boolean isGet() {
@@ -46,16 +47,16 @@ public class TestFile {
             offset = DELETE_LENGTH;
         }
 
-        status = getFileName().substring(offset, offset + STATUS_CODE_LENGTH);
+        status = getFileName().getName().substring(offset, offset + STATUS_CODE_LENGTH);
         return status;
     }
 
     public boolean isJson() {
-        return this.getFileName().endsWith(JSON_SUFFIX);
+        return this.getFileName().getName().endsWith(JSON_SUFFIX);
     }
 
     public boolean isTestFile() {
-        String fileName = this.getFileName();
+        String fileName = this.getFileName().getName();
         String[] split = fileName.split("[.]");
         boolean isTestFile = false;
         if (split.length == 2 && JSON.equals(split[1])) {

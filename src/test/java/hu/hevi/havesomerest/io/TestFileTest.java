@@ -1,5 +1,6 @@
 package hu.hevi.havesomerest.io;
 
+import hu.hevi.havesomerest.converter.Filename;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,12 +28,12 @@ public class TestFileTest {
     @Test
     public void getFileName() throws Exception {
         // GIVEN
-        String expected = "get200MyTest.json";
+        Filename expected = new Filename("get200MyTest.json");
 
         when(path.getFileName().toString()).thenReturn("get200MyTest.json");
 
         // WHEN
-        String actual = underTest.getFileName();
+        Filename actual = underTest.getFileName();
 
         // THEN
         Assert.assertEquals(expected, actual);

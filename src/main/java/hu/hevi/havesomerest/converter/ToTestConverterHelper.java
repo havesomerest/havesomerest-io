@@ -1,7 +1,6 @@
 package hu.hevi.havesomerest.converter;
 
 import hu.hevi.havesomerest.io.TestDirectory;
-import hu.hevi.havesomerest.io.TestFile;
 import hu.hevi.havesomerest.test.Test;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -12,7 +11,10 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 
 import java.nio.file.Files;
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
@@ -43,14 +45,14 @@ public class ToTestConverterHelper {
 
                                        if (testFile.isTestFile()) {
                                            Test t = getTest(convertedObject);
-                                           Filename filename = new Filename(testFile.getFileName());
+                                           Filename filename = testFile.getFileName();
                                            t.setName(filename.getName());
 
                                            String[] splittedPath = testFile.getPath().toString().split("/");
                                            List<String> endpoints = getEndpoint(splittedPath);
                                            t.setEndpointParts(endpoints);
 
-                                           List<String> pathVariablesInFileName = getPathVariablesFromFilename(testFile);
+                                           List<String> pathVariablesInFileName = filename.getPathVariables();
                                            log.debug("pathVariables in filename: " + pathVariablesInFileName.toString());
 
                                            if (pathVariablesInFileName.size() > 0) {
@@ -82,23 +84,6 @@ public class ToTestConverterHelper {
                            });
                        });
         return testByFileContent;
-    }
-
-    private List<String> getPathVariablesFromFilename(TestFile testFile) {
-        String[] filenameSplittedByUnderscore = testFile.getFileName().split("_");
-        List<String> filenameSplittedList = new LinkedList<>();
-        if (filenameSplittedByUnderscore.length > 1) {
-            filenameSplittedList = new LinkedList<>(Arrays.asList(filenameSplittedByUnderscore));
-            if (hasAtLeastTwoElements(filenameSplittedList)) {
-                filenameSplittedList.remove(0);
-                filenameSplittedList.remove(filenameSplittedList.size() - 1);
-            }
-        }
-        return filenameSplittedList;
-    }
-
-    private boolean hasAtLeastTwoElements(List<String> filenameSplittedList) {
-        return filenameSplittedList.size() > 1;
     }
 
     private Test getTest(JSONObject jsonObject) {
