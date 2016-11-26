@@ -91,7 +91,7 @@ public class ToTestConverterHelper {
         if (jsonObject.has(REQUEST)) {
             JSONObject requestWrapper = (JSONObject) jsonObject.get(REQUEST);
             if (requestWrapper.has(BODY)) {
-                JSONObject body = (JSONObject) requestWrapper.get(BODY);
+                String body = ((JSONObject) requestWrapper.get(BODY)).toString();
                 testBuilder.request(body);
             }
 
@@ -106,7 +106,7 @@ public class ToTestConverterHelper {
             JSONObject response = (JSONObject) jsonObject.get(RESPONSE);
             JSONObject headers = (JSONObject) response.get(HEADERS);
             if (response.has(BODY)) {
-                testBuilder.response((JSONObject) response.get(BODY));
+                testBuilder.response(((JSONObject) response.get(BODY)).toString());
             }
 
             HttpHeaders httpHeaders = headersHelper.getHeaders(response);

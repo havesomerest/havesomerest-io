@@ -1,8 +1,6 @@
 package hu.hevi.havesomerest.test;
 
-import org.json.JSONObject;
-import org.junit.*;
-import org.mockito.Mock;
+import org.junit.Before;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -14,8 +12,8 @@ import static org.junit.Assert.assertEquals;
 
 public class TestTest {
 
-    @Mock
-    private JSONObject jsonObject;
+    public static final String REQUEST = "request";
+    public static final String RESPONSE = "response";
 
     private Test underTest;
 
@@ -30,7 +28,7 @@ public class TestTest {
         // GIVEN
         boolean expected = true;
 
-        underTest.setRequest(new JSONObject());
+        underTest.setRequest(REQUEST);
 
         // WHEN
         boolean actual = underTest.hasRequest();
@@ -58,7 +56,7 @@ public class TestTest {
         // GIVEN
         boolean expected = true;
 
-        underTest.setResponse(new JSONObject());
+        underTest.setResponse("response");
 
         // WHEN
         boolean actual = underTest.hasResponse();
@@ -86,8 +84,8 @@ public class TestTest {
         // GIVEN
         Test expected = new Test("name", "statusCode", Arrays.asList("end", "point", "parts"),
                                  new HashMap<>(), HttpMethod.POST, "description",
-                                 new HttpHeaders(), new HashMap<>(), jsonObject,
-                                 jsonObject, new HttpHeaders());
+                                 new HttpHeaders(), new HashMap<>(), REQUEST,
+                                 "response", new HttpHeaders());
 
         // WHEN
         Test actual = underTest.toBuilder()
@@ -99,8 +97,8 @@ public class TestTest {
                                .description("description")
                                .requestHeaders(new HttpHeaders())
                                .requestParams(new HashMap<>())
-                               .request(jsonObject)
-                               .response(jsonObject)
+                               .request(REQUEST)
+                               .response(RESPONSE)
                                .responseHeaders(new HttpHeaders())
                                .build();
 

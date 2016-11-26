@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.json.JSONObject;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 
@@ -25,8 +24,8 @@ public class Test {
     private String description;
     private HttpHeaders requestHeaders;
     private Map<String, String> requestParams;
-    private JSONObject request;
-    private JSONObject response;
+    private String request;
+    private String response;
     private HttpHeaders responseHeaders;
 
     public boolean hasRequest() {
