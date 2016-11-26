@@ -15,6 +15,7 @@ public class TestFile {
 
     private static final String JSON = "json";
     private static final String JSON_SUFFIX = ".json";
+    private static final String XML_SUFFIX = ".xml";
 
     private final Path path;
 
@@ -51,17 +52,13 @@ public class TestFile {
         return status;
     }
 
-    public boolean isJson() {
-        return this.getFileName().getName().endsWith(JSON_SUFFIX);
-    }
-
-    public boolean isTestFile() {
-        String fileName = this.getFileName().getName();
-        String[] split = fileName.split("[.]");
-        boolean isTestFile = false;
-        if (split.length == 2 && JSON.equals(split[1])) {
-            isTestFile = true;
+    public FileType getFileType() {
+        if (this.getFileName().getName().endsWith(JSON_SUFFIX)) {
+            return FileType.JSON;
+        } else if (this.getFileName().getName().endsWith(XML_SUFFIX)) {
+            return FileType.XML;
+        } else {
+            throw new IllegalArgumentException(this.getFileName().getName());
         }
-        return isTestFile;
     }
 }

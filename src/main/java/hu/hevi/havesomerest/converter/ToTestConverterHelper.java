@@ -1,11 +1,17 @@
 package hu.hevi.havesomerest.converter;
 
+import hu.hevi.havesomerest.io.FileType;
 import hu.hevi.havesomerest.io.TestDirectory;
 import hu.hevi.havesomerest.test.Test;
 import org.json.JSONObject;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
@@ -30,7 +36,11 @@ public class ToTestConverterHelper {
     private static final String REQUEST = "request";
 
     @Autowired
-    private HeadersHelper headersHelper;
+    @Qualifier("jsonHeadersHelper")
+    private HeadersHelper jsonHeadersHelper;
+    @Autowired
+    @Qualifier("xmlHeadersHelper")
+    private HeadersHelper xmlHeadersHelper;
 
     public Map<Test, String> getTestsByFileContent(List<TestDirectory> testDirectories) {
         Map<Test, String> testByFileContent = new HashMap<>();
@@ -40,50 +50,92 @@ public class ToTestConverterHelper {
                            testCase.forEach(testFile -> {
                                try {
                                    String fileContent = new String(Files.readAllBytes(testFile.getPath()));
-                                   if (testFile.isJson()) {
+                                   FileType fileType = testFile.getFileType();
+                                   Test t = null;
+                                   if (fileType.equals(FileType.JSON)) {
                                        JSONObject convertedObject = new JSONObject(fileContent);
+                                       t = fromJsonObject(convertedObject);
+                                   } else if (fileType.equals(FileType.XML)) {
+                                       Document doc = Jsoup.parse(fileContent);
+                                       t = fromXmlObject(doc);
+                                   }
 
-                                       if (testFile.isTestFile()) {
-                                           Test t = fromJsonObject(convertedObject);
-                                           Filename filename = testFile.getFileName();
-                                           t.setName(filename.getName());
 
-                                           String[] splittedPath = testFile.getPath().toString().split("/");
-                                           List<String> endpoints = getEndpoint(splittedPath);
-                                           t.setEndpointParts(endpoints);
+                                   Filename filename = testFile.getFileName();
+                                   t.setName(filename.getName());
 
-                                           List<String> pathVariablesInFileName = filename.getPathVariables();
-                                           log.debug("pathVariables in filename: " + pathVariablesInFileName.toString());
+                                   String[] splittedPath = testFile.getPath().toString().split("/");
+                                   List<String> endpoints = getEndpoint(splittedPath);
+                                   t.setEndpointParts(endpoints);
 
-                                           if (pathVariablesInFileName.size() > 0) {
-                                               List<String> pathVariablesInEndpoint = endpoints.stream().filter(endpoint -> {
-                                                   return endpoint.startsWith("_") && endpoint.endsWith("_");
-                                               }).collect(Collectors.toList());
+                                   List<String> pathVariablesInFileName = filename.getPathVariables();
+                                   log.debug("pathVariables in filename: " + pathVariablesInFileName.toString());
 
-                                               for (int i = 0; i < pathVariablesInFileName.size(); i++) {
-                                                   try {
-                                                       t.getPathVariablesByName().put(pathVariablesInEndpoint.get(i), pathVariablesInFileName.get(i));
-                                                   } catch (IndexOutOfBoundsException e) {
-                                                       log.warn("No Pathvariable in: " + t.toString());
-                                                   }
-                                               }
+                                   if (pathVariablesInFileName.size() > 0) {
+                                       List<String> pathVariablesInEndpoint = endpoints.stream().filter(endpoint -> {
+                                           return endpoint.startsWith("_") && endpoint.endsWith("_");
+                                       }).collect(Collectors.toList());
+
+                                       for (int i = 0; i < pathVariablesInFileName.size(); i++) {
+                                           try {
+                                               t.getPathVariablesByName().put(pathVariablesInEndpoint.get(i), pathVariablesInFileName.get(i));
+                                           } catch (IndexOutOfBoundsException e) {
+                                               log.warn("No Pathvariable in: " + t.toString());
                                            }
-
-                                           String statusCode = filename.getStatusCode();
-                                           HttpMethod httpMethod = filename.getMethod();
-
-                                           t.setStatusCode(statusCode);
-                                           t.setMethod(httpMethod);
-
-                                           testByFileContent.put(t, fileContent);
                                        }
                                    }
+
+                                   String statusCode = filename.getStatusCode();
+                                   HttpMethod httpMethod = filename.getMethod();
+
+                                   t.setStatusCode(statusCode);
+                                   t.setMethod(httpMethod);
+
+                                   testByFileContent.put(t, fileContent);
+
                                } catch (Exception e) {
                                    e.printStackTrace();
                                }
                            });
                        });
         return testByFileContent;
+    }
+
+    private Test fromXmlObject(Document doc) {
+
+        Test.TestBuilder testBuilder = Test.builder();
+
+        if (doc.select(REQUEST) != null) {
+            Elements requestWrapper = doc.select(REQUEST);
+
+            if (requestWrapper.select("requestBody") != null) {
+                String body = requestWrapper.select("requestBody").toString();
+                testBuilder.request(body);
+            }
+
+            HttpHeaders httpHeaders = xmlHeadersHelper.getHeaders(requestWrapper);
+            testBuilder.requestHeaders(httpHeaders);
+
+            Map<String, String> parameters = getXmlParameters(requestWrapper);
+            testBuilder.requestParams(parameters);
+
+        }
+        if (doc.select(RESPONSE).size() != 0) {
+            Elements response = doc.select(RESPONSE);
+            Elements headers = response.select(HEADERS);
+            if (response.select(BODY).size() != 0) {
+                testBuilder.response(response.select(BODY).toString());
+            }
+
+            HttpHeaders httpHeaders = xmlHeadersHelper.getHeaders(response);
+            testBuilder.responseHeaders(httpHeaders);
+        }
+        if (doc.select(DESCRIPTION).size() != 0) {
+
+            testBuilder.description(((String) doc.select(DESCRIPTION).toString())).build();
+        }
+
+        return testBuilder.pathVariablesByName(new HashMap<>()).build();
     }
 
     private Test fromJsonObject(JSONObject jsonObject) {
@@ -95,10 +147,10 @@ public class ToTestConverterHelper {
                 testBuilder.request(body);
             }
 
-            HttpHeaders httpHeaders = headersHelper.getHeaders(requestWrapper);
+            HttpHeaders httpHeaders = jsonHeadersHelper.getHeaders(requestWrapper);
             testBuilder.requestHeaders(httpHeaders);
 
-            Map<String, String> parameters = getParameters(requestWrapper);
+            Map<String, String> parameters = getJsonParameters(requestWrapper);
             testBuilder.requestParams(parameters);
 
         }
@@ -109,17 +161,29 @@ public class ToTestConverterHelper {
                 testBuilder.response(((JSONObject) response.get(BODY)).toString());
             }
 
-            HttpHeaders httpHeaders = headersHelper.getHeaders(response);
+            HttpHeaders httpHeaders = jsonHeadersHelper.getHeaders(response);
             testBuilder.responseHeaders(httpHeaders);
         }
         if (jsonObject.has(DESCRIPTION)) {
 
             testBuilder.description(((String) jsonObject.get(DESCRIPTION).toString())).build();
         }
-        return testBuilder.pathVariablesByName(new HashMap<>()).build();
+
+        testBuilder.pathVariablesByName(new HashMap<>());
+
+        return testBuilder.build();
     }
 
-    private Map<String, String> getParameters(JSONObject requestWrapper) {
+    private Map<String,String> getXmlParameters(Elements requestWrapper) {
+        Map<String, String> parameters = new HashMap<>();
+        Elements rawParameters = requestWrapper.select("parameters > *");
+        for (Element key : rawParameters) {
+            parameters.put(key.toString(), (String) rawParameters.select(key.nodeName()).toString());
+        }
+        return parameters;
+    }
+
+    private Map<String, String> getJsonParameters(JSONObject requestWrapper) {
         Map<String, String> parameters = new HashMap<>();
         JSONObject rawParameters = (JSONObject) requestWrapper.get(PARAMETERS);
         rawParameters.keySet().forEach(key -> {

@@ -29,7 +29,7 @@ public class Test {
     private HttpHeaders responseHeaders;
 
     public boolean hasRequest() {
-        return request != null;
+        return request != null && !request.trim().equals("");
     }
 
     public boolean hasResponse() {
