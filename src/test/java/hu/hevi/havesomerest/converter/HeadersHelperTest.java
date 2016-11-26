@@ -30,12 +30,12 @@ public class HeadersHelperTest {
     @Mock
     private Logger log;
 
-    private HeadersHelper underTest;
+    private JsonHeadersHelper underTest;
 
     @Before
     public void setUp() throws Exception {
         initMocks(this);
-        underTest = new HeadersHelper();
+        underTest = new JsonHeadersHelper();
         underTest.setLog(log);
     }
 

@@ -3,7 +3,6 @@ package hu.hevi.havesomerest.converter;
 import hu.hevi.havesomerest.io.TestDirectory;
 import hu.hevi.havesomerest.test.Test;
 import lombok.extern.slf4j.Slf4j;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -21,7 +20,7 @@ public class ToTestConverter {
     @Autowired
     private ToTestConverterHelper testConverterHelper;
 
-    public Map<Test, JSONObject> convert(Map<Path, Optional<TestDirectory>> filesByDirectory) {
+    public Map<Test, String> convert(Map<Path, Optional<TestDirectory>> filesByDirectory) {
 
         List<TestDirectory> testDirectories = new ArrayList<>();
         filesByDirectory.entrySet().forEach((en) -> {
@@ -30,7 +29,7 @@ public class ToTestConverter {
             });
         });
 
-        Map<Test, JSONObject> testsByFileContent = testConverterHelper.getTests(testDirectories);
+        Map<Test, String> testsByFileContent = testConverterHelper.getTestsByFileContent(testDirectories);
 
         log.info(MessageFormat.format("{0} tests found...\n", testsByFileContent.keySet().size()));
 

@@ -32,8 +32,8 @@ public class ToTestConverterHelper {
     @Autowired
     private HeadersHelper headersHelper;
 
-    public Map<Test, JSONObject> getTests(List<TestDirectory> testDirectories) {
-        Map<Test, JSONObject> testByFileContent = new HashMap<>();
+    public Map<Test, String> getTestsByFileContent(List<TestDirectory> testDirectories) {
+        Map<Test, String> testByFileContent = new HashMap<>();
         testDirectories.stream()
                        .map(TestDirectory::getTestFiles)
                        .forEach(testCase -> {
@@ -44,7 +44,7 @@ public class ToTestConverterHelper {
                                        JSONObject convertedObject = new JSONObject(fileContent);
 
                                        if (testFile.isTestFile()) {
-                                           Test t = getTest(convertedObject);
+                                           Test t = fromJsonObject(convertedObject);
                                            Filename filename = testFile.getFileName();
                                            t.setName(filename.getName());
 
@@ -75,7 +75,7 @@ public class ToTestConverterHelper {
                                            t.setStatusCode(statusCode);
                                            t.setMethod(httpMethod);
 
-                                           testByFileContent.put(t, convertedObject);
+                                           testByFileContent.put(t, fileContent);
                                        }
                                    }
                                } catch (Exception e) {
@@ -86,7 +86,7 @@ public class ToTestConverterHelper {
         return testByFileContent;
     }
 
-    private Test getTest(JSONObject jsonObject) {
+    private Test fromJsonObject(JSONObject jsonObject) {
         Test.TestBuilder testBuilder = Test.builder();
         if (jsonObject.has(REQUEST)) {
             JSONObject requestWrapper = (JSONObject) jsonObject.get(REQUEST);
