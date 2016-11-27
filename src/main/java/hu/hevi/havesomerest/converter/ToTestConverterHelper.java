@@ -109,7 +109,7 @@ public class ToTestConverterHelper {
             Elements requestWrapper = doc.select(REQUEST);
 
             if (requestWrapper.select("requestBody") != null) {
-                String body = requestWrapper.select("requestBody").toString();
+                String body = requestWrapper.select("requestBody").html();
                 testBuilder.request(body);
             }
 
@@ -120,11 +120,11 @@ public class ToTestConverterHelper {
             testBuilder.requestParams(parameters);
 
         }
-        if (doc.select(RESPONSE).size() != 0) {
+        if (doc.select(RESPONSE) != null) {
             Elements response = doc.select(RESPONSE);
             Elements headers = response.select(HEADERS);
-            if (response.select(BODY).size() != 0) {
-                testBuilder.response(response.select(BODY).toString());
+            if (response.select(BODY) != null) {
+                testBuilder.response(response.select("requestBody").html());
             }
 
             HttpHeaders httpHeaders = xmlHeadersHelper.getHeaders(response);
