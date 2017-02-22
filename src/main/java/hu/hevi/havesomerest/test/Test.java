@@ -1,5 +1,6 @@
 package hu.hevi.havesomerest.test;
 
+import hu.hevi.havesomerest.io.FileType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -27,6 +28,7 @@ public class Test {
     private String request;
     private String response;
     private HttpHeaders responseHeaders;
+    private FileType fileType;
 
     public boolean hasRequest() {
         return request != null && !request.trim().equals("");

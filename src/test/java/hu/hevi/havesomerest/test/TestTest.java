@@ -1,5 +1,6 @@
 package hu.hevi.havesomerest.test;
 
+import hu.hevi.havesomerest.io.FileType;
 import org.junit.Before;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpHeaders;
@@ -85,7 +86,7 @@ public class TestTest {
         Test expected = new Test("name", "statusCode", Arrays.asList("end", "point", "parts"),
                                  new HashMap<>(), HttpMethod.POST, "description",
                                  new HttpHeaders(), new HashMap<>(), REQUEST,
-                                 "response", new HttpHeaders());
+                                 "response", new HttpHeaders(), FileType.JSON);
 
         // WHEN
         Test actual = underTest.toBuilder()
@@ -100,6 +101,7 @@ public class TestTest {
                                .request(REQUEST)
                                .response(RESPONSE)
                                .responseHeaders(new HttpHeaders())
+                               .fileType(FileType.JSON)
                                .build();
 
         // THEN

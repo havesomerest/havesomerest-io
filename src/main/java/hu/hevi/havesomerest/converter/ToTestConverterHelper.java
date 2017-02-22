@@ -104,6 +104,7 @@ public class ToTestConverterHelper {
     private Test fromXmlObject(Document doc) {
 
         Test.TestBuilder testBuilder = Test.builder();
+        testBuilder.fileType(FileType.XML);
 
         if (doc.select(REQUEST) != null) {
             Elements requestWrapper = doc.select(REQUEST);
@@ -140,6 +141,7 @@ public class ToTestConverterHelper {
 
     private Test fromJsonObject(JSONObject jsonObject) {
         Test.TestBuilder testBuilder = Test.builder();
+        testBuilder.fileType(FileType.JSON);
         if (jsonObject.has(REQUEST)) {
             JSONObject requestWrapper = (JSONObject) jsonObject.get(REQUEST);
             if (requestWrapper.has(BODY)) {
